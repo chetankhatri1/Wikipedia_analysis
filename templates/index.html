@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wikipedia Category Word Cloud</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Wikipedia Category Word Cloud</h1>
+            <p>Visualize word frequencies from Wikipedia categories</p>
+        </header>
+
+        <div class="main-content">
+            <div class="input-section">
+                <form id="category-form">
+                    <div class="form-group">
+                        <label for="category">Wikipedia Category:</label>
+                        <input type="text" id="category" name="category" placeholder="e.g. Large_language_models" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="top_n">Number of Words:</label>
+                        <input type="number" id="top_n" name="top_n" value="100" min="10" max="500">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="color_palette">Color Palette:</label>
+                        <select id="color_palette" name="color_palette">
+                            {% for palette in palette_options %}
+                                <option value="{{ palette.name }}" data-colors="{{ palette.colors|tojson }}">
+                                    {{ palette.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Preview Colors:</label>
+                        <div class="color-preview" id="color-preview"></div>
+                    </div>
+                    
+                    <div class="form-group checkbox">
+                        <input type="checkbox" id="force_refresh" name="force_refresh">
+                        <label for="force_refresh">Force Refresh (Ignore Cache)</label>
+                    </div>
+                    
+                    <button type="submit" id="analyze-btn">Generate Word Cloud</button>
+                </form>
+
+                <div class="cached-categories">
+                    <h3>Cached Categories</h3>
+                    <p>Select a previously analyzed category:</p>
+                    <div class="category-list">
+                        {% if cached_categories %}
+                            {% for category in cached_categories %}
+                                <div class="cached-category" data-category="{{ category[0] }}">
+                                    {{ category[0] }}
+                                    <span class="category-meta">
+                                        {{ category[1] }} | {{ category[2] }} words | {{ category[3] }} unique
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No cached categories found. Analyze a category to see it here.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section" id="results-section">
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing category... This may take a few moments.</p>
+                </div>
+
+                <div class="results-content hidden" id="results-content">
+                    <h2 id="result-title">Word Cloud for Category: <span id="category-name"></span></h2>
+                    
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="wordcloud">Word Cloud</button>
+                        <button class="tab-btn" data-tab="table">Table View</button>
+                    </div>
+                    
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="wordcloud-tab">
+                            <div class="wordcloud-container">
+                                <img id="wordcloud-img" src="" alt="Word Cloud">
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane" id="table-tab">
+                            <div class="stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Total Words:</span>
+                                    <span class="stat-value" id="total-words">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Unique Words:</span>
+                                    <span class="stat-value" id="unique-words">0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="table-container">
+                                <table id="word-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Word</th>
+                                            <th>Frequency</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="word-table-body">
+                                        <!-- Table content will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="error-message hidden" id="error-message">
+                    <p id="error-text"></p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Wikipedia Category Word Cloud Visualizer | Created with Flask and JavaScript</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
